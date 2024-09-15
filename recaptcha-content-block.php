@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: reCAPTCHA Content Block
-Description: Aggiunge un blocco Gutenberg che protegge un contenuto di testo con reCAPTCHA. Utile per proteggere gli indirizzi email da spam.
-Version: 1.0
+Description: Aggiunge un blocco Gutenberg che protegge un qualunque blocco o contenuto con reCAPTCHA.
+Version: 1.1.0
 Author: Senioxtreme
 Author URI: https://senioxtreme.it
 */
@@ -54,8 +54,8 @@ function rcb_register_block_type() {
     ) );
 }
 
-function rcb_render_protected_content( $attributes ) {
-    $content = isset( $attributes['content'] ) ? $attributes['content'] : '';
+function rcb_render_protected_content( $attributes, $content ) {
+    $button_text = isset( $attributes['buttonText'] ) ? $attributes['buttonText'] : 'Mostra il contenuto';
     $container_id = 'rcb-content-' . uniqid();
 
     $site_key = get_option( 'rcb_site_key', '' );
@@ -75,8 +75,8 @@ function rcb_render_protected_content( $attributes ) {
     wp_add_inline_script( 'google-recaptcha', rcb_inline_script() );
 
     $output  = '<div id="' . esc_attr( $container_id ) . '" class="rcb-container">';
-    $output .= '<button class="rcb-reveal-button">Mostra il contenuto</button>';
-    $output .= '<div class="rcb-protected-content" style="display:none;">' . wp_kses_post( wpautop( $content ) ) . '</div>';
+    $output .= '<button class="rcb-reveal-button">' . esc_html( $button_text ) . '</button>';
+    $output .= '<div class="rcb-protected-content" style="display:none;">' . $content . '</div>';
     $output .= '</div>';
 
     return $output;
