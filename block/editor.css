@@ -1,0 +1,7 @@
+.rcb-container {
+    border: 1px dashed #ccc;
+    padding: 10px;
+}
+.rcb-recaptcha-container {
+    margin-top: 10px;
+}
