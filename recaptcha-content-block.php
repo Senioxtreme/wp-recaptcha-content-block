@@ -2,7 +2,7 @@
 /*
 Plugin Name: reCAPTCHA Content Block
 Description: Aggiunge un blocco Gutenberg che protegge un qualunque blocco o contenuto con reCAPTCHA.
-Version: 1.1.0
+Version: 1.1.1
 Author: Senioxtreme
 Author URI: https://senioxtreme.it
 */
@@ -83,7 +83,7 @@ function rcb_render_protected_content( $attributes, $content ) {
 }
 
 function rcb_inline_script() {
-    $site_key = get_option( 'rcb_site_key', '' );
+    $site_key = esc_js( get_option( 'rcb_site_key', '' ) );
 
     $script = "
     window.rcb_onload = function() {
@@ -117,7 +117,6 @@ function rcb_inline_script() {
     return $script;
 }
 
-
 add_action( 'admin_menu', 'rcb_add_admin_menu' );
 
 function rcb_add_admin_menu() {
@@ -136,16 +135,23 @@ function rcb_settings_page() {
     }
 
     if ( isset( $_POST['rcb_save_settings'] ) && check_admin_referer( 'rcb_save_settings' ) ) {
-        update_option( 'rcb_site_key', sanitize_text_field( $_POST['rcb_site_key'] ) );
-        update_option( 'rcb_secret_key', sanitize_text_field( $_POST['rcb_secret_key'] ) );
+        $site_key = sanitize_text_field( $_POST['rcb_site_key'] );
+        $secret_key = sanitize_text_field( $_POST['rcb_secret_key'] );
 
-        add_settings_error( 'rcb_messages', 'rcb_message', 'Impostazioni salvate.', 'updated' );
+        if ( ! empty( $site_key ) && ! empty( $secret_key ) ) {
+            update_option( 'rcb_site_key', $site_key );
+            update_option( 'rcb_secret_key', $secret_key );
+
+            add_settings_error( 'rcb_messages', 'rcb_message', 'Impostazioni salvate.', 'updated' );
+        } else {
+            add_settings_error( 'rcb_messages', 'rcb_message', 'Le chiavi non possono essere vuote.', 'error' );
+        }
     }
 
     settings_errors( 'rcb_messages' );
 
-    $site_key   = get_option( 'rcb_site_key', '' );
-    $secret_key = get_option( 'rcb_secret_key', '' );
+    $site_key   = esc_attr( get_option( 'rcb_site_key', '' ) );
+    $secret_key = esc_attr( get_option( 'rcb_secret_key', '' ) );
 
     ?>
     <div class="wrap">
@@ -167,3 +173,4 @@ function rcb_settings_page() {
     </div>
     <?php
 }
+?>
