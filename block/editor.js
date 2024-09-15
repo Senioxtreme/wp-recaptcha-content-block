@@ -2,7 +2,7 @@
     var el = element.createElement;
     var RichText = blockEditor.RichText;
 
-    console.log('Il file editor.js è stato caricato correttamente.');
+    console.log('reCAPTCHA Content Protection caricato correttamente.');
 
     blocks.registerBlockType( 'rcb/recaptcha-content-block', {
         title: 'reCAPTCHA Content Protection',
@@ -37,7 +37,7 @@
             );
         },
         save: function() {
-            return null; // Il contenuto viene renderizzato lato server
+            return null;
         },
     } );
 } )( window.wp.blocks, window.wp.element, window.wp.blockEditor );
