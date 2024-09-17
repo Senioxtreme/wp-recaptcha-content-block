@@ -7,22 +7,17 @@ Author: Senioxtreme
 Author URI: https://senioxtreme.it
 */
 
-require_once plugin_dir_path( __FILE__ ) . 'plugin-update-checker/plugin-update-checker.php';
+require plugin_dir_path( __FILE__ ) . 'plugin-update-checker/plugin-update-checker.php';
 
-if ( class_exists( 'Puc_v5\PucFactory' ) ) {
-    $myUpdateChecker = Puc_v5\PucFactory::buildUpdateChecker(
-        'https://github.com/Senioxtreme/wp-recaptcha-content-block/',
-        __FILE__,
-        'wp-recaptcha-content-block'
-    );
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-    if ( isset( $myUpdateChecker ) ) {
-        $myUpdateChecker->setBranch('main');
-    }
-} else {
+$myUpdateChecker = PucFactory::buildUpdateChecker(
+    'https://github.com/Senioxtreme/wp-recaptcha-content-block/',
+    __FILE__,
+    'wp-recaptcha-content-block'
+);
 
-    error_log('Errore: La classe Puc_v5\PucFactory non è stata trovata.');
-}
+$myUpdateChecker->setBranch('main');
 
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
