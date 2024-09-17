@@ -2,7 +2,7 @@
 /*
 Plugin Name: reCAPTCHA Content Block
 Description: Aggiunge un blocco Gutenberg che protegge un qualunque blocco o contenuto con reCAPTCHA.
-Version: 1.1.1
+Version: 1.1.2
 Author: Senioxtreme
 Author URI: https://senioxtreme.it
 */
