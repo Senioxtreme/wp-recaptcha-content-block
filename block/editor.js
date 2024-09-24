@@ -6,7 +6,7 @@
     var TextControl = wp.components.TextControl;
 
     blocks.registerBlockType( 'rcb/recaptcha-content-block', {
-        title: 'Contenuto Protetto da reCAPTCHA',
+        title: 'Sezione reCAPTCHA',
         icon: 'shield',
         category: 'common',
         attributes: {
