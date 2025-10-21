@@ -4,7 +4,7 @@ Plugin Name: reCAPTCHA, hCaptcha & Turnstile Content Block
 Plugin URI: https://github.com/Senioxtreme/wp-recaptcha-content-block/
 Description: Aggiunge un blocco Gutenberg e uno shortcode per proteggere contenuti con reCAPTCHA, hCaptcha o Cloudflare Turnstile.
 Version: 2.0.0
-Author: Senioxtreme / Gemini
+Author: Senioxtreme
 Author URI: https://senioxtreme.it
 Text Domain: rcb-recaptcha-block
 Domain Path: /languages
@@ -335,4 +335,5 @@ final class RCB_Plugin {
     }
 }
 RCB_Plugin::get_instance();
+
 
