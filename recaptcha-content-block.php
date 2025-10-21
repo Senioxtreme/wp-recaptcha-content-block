@@ -1,10 +1,10 @@
 <?php
 /*
-Plugin Name: reCAPTCHA Content Block
+Plugin Name: reCAPTCHA, hCaptcha & Turnstile Content Block
 Plugin URI: https://github.com/Senioxtreme/wp-recaptcha-content-block/
 Description: Aggiunge un blocco Gutenberg e uno shortcode per proteggere contenuti con reCAPTCHA, hCaptcha o Cloudflare Turnstile.
 Version: 2.0.0
-Author: Senioxtreme
+Author: Senioxtreme / Gemini
 Author URI: https://senioxtreme.it
 Text Domain: rcb-recaptcha-block
 Domain Path: /languages
@@ -83,7 +83,6 @@ final class RCB_Plugin {
     }
     
     public function render_protected_content( $attributes, $content ) {
-        // Bypass Logic
         $bypass_roles = get_option('rcb_bypass_roles', ['administrator', 'editor']);
         if ( is_user_logged_in() ) {
             $user = wp_get_current_user();
@@ -92,7 +91,6 @@ final class RCB_Plugin {
             }
         }
 
-        // Check if provider is configured
         $provider = get_option('rcb_provider', 'recaptcha');
         $keys_are_set = false;
         switch($provider) {
@@ -132,9 +130,17 @@ final class RCB_Plugin {
     }
 
     public function enqueue_frontend_assets() {
-        // ... (omitting unchanged code for brevity)
-        // This method remains the same as the previous version
-        // ...
+        $provider = get_option('rcb_provider', 'recaptcha');
+        $script_url = '';
+        $site_key = '';
+
+        switch($provider) {
+            case 'hcaptcha':
+                $script_url = 'https://js.hcaptcha.com/1/api.js?onload=rcbCaptchaInit&render=explicit';
+                $site_key = get_option('rcb_hcaptcha_site_key');
+                break;
+            case 'turnstile':
+                $script_url = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=rcbCaptchaInit&render=explicit';
                 $site_key = get_option('rcb_turnstile_site_key');
                 break;
             case 'recaptcha':
@@ -159,9 +165,9 @@ final class RCB_Plugin {
     }
 
     public function handle_captcha_verify() {
-        // ... (omitting unchanged code for brevity)
-        // This method remains the same as the previous version
-        // ...
+        check_ajax_referer( 'rcb-verify-nonce', 'nonce' );
+
+        $token = isset( $_POST['token'] ) ? sanitize_text_field( $_POST['token'] ) : '';
         $transient_key = isset( $_POST['transient_key'] ) ? sanitize_text_field( $_POST['transient_key'] ) : '';
 
         if ( empty( $token ) || empty( $transient_key ) ) {
@@ -256,7 +262,9 @@ final class RCB_Plugin {
                     <tr valign="top">
                         <th scope="row"><?php esc_html_e('Salta CAPTCHA per questi ruoli', 'rcb-recaptcha-block'); ?></th>
                         <td>
-                            <?php foreach (wp_roles()->get_names() as $role_slug => $role_name) : ?>
+                            <?php 
+                            $roles = wp_roles()->get_names();
+                            foreach ($roles as $role_slug => $role_name) : ?>
                             <label><input type="checkbox" name="rcb_bypass_roles[]" value="<?php echo esc_attr($role_slug); ?>" <?php checked(in_array($role_slug, $current_bypass_roles)); ?>> <?php echo esc_html($role_name); ?></label><br>
                             <?php endforeach; ?>
                             <p class="description"><?php esc_html_e('Gli utenti con i ruoli selezionati visualizzeranno direttamente il contenuto senza la verifica CAPTCHA.', 'rcb-recaptcha-block'); ?></p>
@@ -266,7 +274,6 @@ final class RCB_Plugin {
 
                 <div id="recaptcha-settings" class="provider-settings">
                     <h2>Google reCAPTCHA v2</h2>
-                    <!-- Unchanged -->
                     <p><?php printf( wp_kses( __( 'Ottieni le chiavi dalla %1$sGoogle reCAPTCHA admin console%2$s.', 'rcb-recaptcha-block' ), ['a' => ['href'=>[],'target'=>[]]] ), '<a href="https://www.google.com/recaptcha/admin/create" target="_blank">', '</a>'); ?></p>
                     <table class="form-table">
                         <tr><th scope="row"><label for="rcb_recaptcha_site_key"><?php esc_html_e( 'Site Key', 'rcb-recaptcha-block' ); ?></label></th><td><input type="text" id="rcb_recaptcha_site_key" name="rcb_recaptcha_site_key" value="<?php echo esc_attr( get_option( 'rcb_recaptcha_site_key' ) ); ?>" class="regular-text" /></td></tr>
@@ -276,7 +283,6 @@ final class RCB_Plugin {
 
                 <div id="hcaptcha-settings" class="provider-settings">
                     <h2>hCaptcha</h2>
-                    <!-- Unchanged -->
                     <p><?php printf( wp_kses( __( 'Ottieni le chiavi dal tuo %1$shCaptcha Dashboard%2$s.', 'rcb-recaptcha-block' ), ['a' => ['href'=>[],'target'=>[]]] ), '<a href="https://dashboard.hcaptcha.com/sites" target="_blank">', '</a>'); ?></p>
                     <table class="form-table">
                         <tr><th scope="row"><label for="rcb_hcaptcha_site_key"><?php esc_html_e( 'Site Key', 'rcb-recaptcha-block' ); ?></label></th><td><input type="text" id="rcb_hcaptcha_site_key" name="rcb_hcaptcha_site_key" value="<?php echo esc_attr( get_option( 'rcb_hcaptcha_site_key' ) ); ?>" class="regular-text" /></td></tr>
@@ -286,7 +292,6 @@ final class RCB_Plugin {
 
                 <div id="turnstile-settings" class="provider-settings">
                     <h2>Cloudflare Turnstile</h2>
-                    <!-- Unchanged -->
                     <p><?php printf( wp_kses( __( 'Ottieni le chiavi dal tuo %1$sCloudflare Dashboard%2$s.', 'rcb-recaptcha-block' ), ['a' => ['href'=>[],'target'=>[]]] ), '<a href="https://dash.cloudflare.com/?to=/:account/turnstile" target="_blank">', '</a>'); ?></p>
                     <table class="form-table">
                         <tr><th scope="row"><label for="rcb_turnstile_site_key"><?php esc_html_e( 'Site Key', 'rcb-recaptcha-block' ); ?></label></th><td><input type="text" id="rcb_turnstile_site_key" name="rcb_turnstile_site_key" value="<?php echo esc_attr( get_option( 'rcb_turnstile_site_key' ) ); ?>" class="regular-text" /></td></tr>
@@ -312,14 +317,17 @@ final class RCB_Plugin {
             <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const providerSelect = document.getElementById('rcb_provider');
-                const settingsDivs = document.querySelectorAll('.provider-settings');
-                function toggleProvider() {
-                    settingsDivs.forEach(div => div.style.display = 'none');
-                    const selectedProvider = providerSelect.value;
-                    document.getElementById(selectedProvider + '-settings').style.display = 'block';
+                if (providerSelect) {
+                    const settingsDivs = document.querySelectorAll('.provider-settings');
+                    function toggleProvider() {
+                        settingsDivs.forEach(div => div.style.display = 'none');
+                        const selectedProvider = providerSelect.value;
+                        const el = document.getElementById(selectedProvider + '-settings');
+                        if(el) el.style.display = 'block';
+                    }
+                    providerSelect.addEventListener('change', toggleProvider);
+                    toggleProvider();
                 }
-                providerSelect.addEventListener('change', toggleProvider);
-                toggleProvider();
             });
             </script>
         </div>
@@ -327,7 +335,4 @@ final class RCB_Plugin {
     }
 }
 RCB_Plugin::get_instance();
-
-
-
 
